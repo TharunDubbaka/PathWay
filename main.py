@@ -23,11 +23,6 @@ app.include_router(
     tags=["Adaptive AI"]
 )
 app.include_router(
-    adaptive_router,
-    prefix="/adaptive",
-    tags=["Adaptive AI"]
-)
-app.include_router(
     studyplan_router,
     prefix="/study-plan",
     tags=["Study Plan"]
@@ -47,17 +42,6 @@ from fastapi.middleware.cors import CORSMiddleware
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:5173"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-from fastapi.middleware.cors import CORSMiddleware
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=[
-        "http://localhost:5173"
-    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
