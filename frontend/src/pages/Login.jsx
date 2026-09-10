@@ -23,7 +23,11 @@ function Login() {
       saveToken(result.token);
       navigate(location.state?.from || "/", { replace: true });
     } catch (requestError) {
-      setError(requestError.response?.data?.detail || "Unable to authenticate");
+      if (!requestError.response) {
+        setError("Cannot reach the API. Start it with: python -m uvicorn main:app --reload");
+      } else {
+        setError(requestError.response.data?.detail || "Unable to authenticate");
+      }
     } finally {
       setLoading(false);
     }
