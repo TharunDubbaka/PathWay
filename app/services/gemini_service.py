@@ -11,11 +11,21 @@ client = genai.Client(
 
 def generate_ai_roadmap(
     goal: str,
-    skill_level: str,
-    current_skills: list[str],
-    study_hours_per_week: int
+    skill_level: str | list,
+    current_skills: list[dict] | int | None = None,
+    study_hours_per_week: int | None = None
 ):
-    current_skills_text = ", ".join(current_skills) if current_skills else "None"
+    if isinstance(skill_level, list):
+        study_hours_per_week = current_skills
+        current_skills = [{"name": skill, "experience_level": "Beginner"} for skill in skill_level]
+        skill_level = "Adaptive"
+
+    current_skills = current_skills or []
+    current_skills_text = ", ".join(
+        f"{skill.get('name', skill) if isinstance(skill, dict) else skill} "
+        f"({skill.get('experience_level', 'Beginner') if isinstance(skill, dict) else 'Beginner'})"
+        for skill in current_skills
+    ) if current_skills else "None"
     prompt = f"""
     Create a learning roadmap.
 
@@ -23,6 +33,11 @@ def generate_ai_roadmap(
     Skill Level: {skill_level}
     Current Skills: {current_skills_text}
     Study Hours Per Week: {study_hours_per_week}
+
+    Align the roadmap to the user's current skills and experience levels.
+    Use known skills as prerequisites, fill only the gaps needed for the goal,
+    and order topics from the user's current ability toward job-ready competence.
+    Do not repeat advanced material when the user already has advanced experience.
 
     Return ONLY valid JSON.
 

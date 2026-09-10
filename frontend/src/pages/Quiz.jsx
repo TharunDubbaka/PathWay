@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { generateQuiz } from "../api/quizApi";
+import GoalPicker from "../components/GoalPicker";
 
 function Quiz() {
-  const [roadmapId, setRoadmapId] = useState("");
+  const [goalId, setGoalId] = useState("");
   const [quiz, setQuiz] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -12,11 +13,11 @@ function Quiz() {
     setQuiz(null);
     try {
       setLoading(true);
-      const result = await generateQuiz(roadmapId);
+      const result = await generateQuiz(goalId);
       setQuiz(result.quiz || []);
     } catch (fetchError) {
       console.error(fetchError);
-      setError("Unable to generate quiz. Verify the roadmap ID.");
+      setError("Unable to generate a quiz for this goal.");
     } finally {
       setLoading(false);
     }
@@ -29,18 +30,8 @@ function Quiz() {
         <p>Practice your current topic with a clear multiple-choice quiz.</p>
 
         <div className="form-row">
-          <input
-            type="text"
-            className="text-input"
-            placeholder="Roadmap ID"
-            value={roadmapId}
-            onChange={(e) => setRoadmapId(e.target.value)}
-          />
-          <button
-            className="primary-button"
-            onClick={handleGenerate}
-            disabled={loading || !roadmapId}
-          >
+          <GoalPicker onSelect={setGoalId} />
+          <button className="primary-button" onClick={handleGenerate} disabled={loading || !goalId}>
             {loading ? "Generating..." : "Generate Quiz"}
           </button>
         </div>

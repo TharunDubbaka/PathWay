@@ -1,8 +1,9 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 
 from app.services.dashboard_service import (
     get_dashboard
 )
+from app.services.auth_service import get_current_user
 
 router = APIRouter(
     prefix="/dashboard",
@@ -11,10 +12,11 @@ router = APIRouter(
 
 
 @router.get("/{roadmap_id}")
-def dashboard(roadmap_id: str):
+def dashboard(roadmap_id: str, user: dict = Depends(get_current_user)):
 
     result = get_dashboard(
-        roadmap_id
+        roadmap_id,
+        user["id"]
     )
 
     if result is None:

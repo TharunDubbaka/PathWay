@@ -2,11 +2,12 @@ from bson import ObjectId
 from app.db.db import roadmaps_collection
 
 
-def get_dashboard(roadmap_id: str):
+def get_dashboard(roadmap_id: str, user_id: str | None = None):
 
-    roadmap = roadmaps_collection.find_one(
-        {"_id": ObjectId(roadmap_id)}
-    )
+    query = {"_id": ObjectId(roadmap_id)}
+    if user_id:
+        query["user_id"] = user_id
+    roadmap = roadmaps_collection.find_one(query)
 
     if not roadmap:
         return None

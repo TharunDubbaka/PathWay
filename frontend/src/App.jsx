@@ -5,6 +5,8 @@ import Dashboard from "./pages/Dashboard";
 import StudyPlan from "./pages/StudyPlan";
 import Quiz from "./pages/Quiz";
 import Analysis from "./pages/Analysis";
+import Login from "./pages/Login";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
   return (
@@ -12,11 +14,12 @@ function App() {
       <Navbar />
       <main className="app-shell">
         <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/study-plan" element={<StudyPlan />} />
-          <Route path="/quiz" element={<Quiz />} />
-          <Route path="/analysis" element={<Analysis />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/" element={<ProtectedRoute><Home /></ProtectedRoute>} />
+          <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+          <Route path="/study-plan" element={<ProtectedRoute><StudyPlan /></ProtectedRoute>} />
+          <Route path="/quiz" element={<ProtectedRoute><Quiz /></ProtectedRoute>} />
+          <Route path="/analysis" element={<ProtectedRoute><Analysis /></ProtectedRoute>} />
         </Routes>
       </main>
     </BrowserRouter>

@@ -26,11 +26,12 @@ def create_roadmap(data):
     }
 
 
-def get_roadmap_by_id(roadmap_id: str):
+def get_roadmap_by_id(roadmap_id: str, user_id: str | None = None):
 
-    roadmap = roadmaps_collection.find_one(
-        {"_id": ObjectId(roadmap_id)}
-    )
+    query = {"_id": ObjectId(roadmap_id)}
+    if user_id:
+        query["user_id"] = user_id
+    roadmap = roadmaps_collection.find_one(query)
 
     if roadmap is None:
         return None

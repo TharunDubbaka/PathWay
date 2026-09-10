@@ -1,22 +1,22 @@
 import { useState } from "react";
 import { getDashboard } from "../api/dashboardApi";
+import GoalPicker from "../components/GoalPicker";
 
 function Analysis() {
-  const [roadmapId, setRoadmapId] = useState("");
   const [analysis, setAnalysis] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const handleFetch = async () => {
+  const handleFetch = async (goalId) => {
     setError("");
     setAnalysis(null);
     try {
       setLoading(true);
-      const result = await getDashboard(roadmapId);
+      const result = await getDashboard(goalId);
       setAnalysis(result);
     } catch (fetchError) {
       console.error(fetchError);
-      setError("Unable to fetch analysis. Confirm the roadmap ID.");
+      setError("Unable to fetch analysis for this goal.");
     } finally {
       setLoading(false);
     }
@@ -28,22 +28,7 @@ function Analysis() {
         <h1>Analysis</h1>
         <p>Inspect the roadmap performance and get a quick health overview.</p>
 
-        <div className="form-row">
-          <input
-            type="text"
-            className="text-input"
-            placeholder="Roadmap ID"
-            value={roadmapId}
-            onChange={(e) => setRoadmapId(e.target.value)}
-          />
-          <button
-            className="primary-button"
-            onClick={handleFetch}
-            disabled={loading || !roadmapId}
-          >
-            {loading ? "Loading..." : "Load Analysis"}
-          </button>
-        </div>
+        <GoalPicker onSelect={handleFetch} />
 
         {error && <div className="error-message">{error}</div>}
       </div>

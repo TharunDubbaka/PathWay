@@ -1,22 +1,22 @@
 import { useState } from "react";
 import { getDashboard } from "../api/dashboardApi";
+import GoalPicker from "../components/GoalPicker";
 
 function Dashboard() {
-  const [roadmapId, setRoadmapId] = useState("");
   const [dashboard, setDashboard] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const handleFetch = async () => {
+  const handleFetch = async (goalId) => {
     setError("");
     setDashboard(null);
     try {
       setLoading(true);
-      const result = await getDashboard(roadmapId);
+      const result = await getDashboard(goalId);
       setDashboard(result);
     } catch (fetchError) {
       console.error(fetchError);
-      setError("Failed to load dashboard. Verify the roadmap ID and backend.");
+      setError("Failed to load this goal's dashboard.");
     } finally {
       setLoading(false);
     }
@@ -28,22 +28,7 @@ function Dashboard() {
         <h1>Dashboard</h1>
         <p>Review the roadmap health, completed topics, and active study goals.</p>
 
-        <div className="form-row">
-          <input
-            type="text"
-            className="text-input"
-            placeholder="Roadmap ID"
-            value={roadmapId}
-            onChange={(e) => setRoadmapId(e.target.value)}
-          />
-          <button
-            className="primary-button"
-            onClick={handleFetch}
-            disabled={loading || !roadmapId}
-          >
-            {loading ? "Loading..." : "Load Dashboard"}
-          </button>
-        </div>
+        <GoalPicker onSelect={handleFetch} />
 
         {error && <div className="error-message">{error}</div>}
       </div>

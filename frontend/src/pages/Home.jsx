@@ -1,18 +1,42 @@
-import { useState } from "react";
-import { generateRoadmap } from "../api/roadmapApi";
+import { useEffect, useState } from "react";
+import { generateRoadmap, getGenerationStatus } from "../api/roadmapApi";
+import { getGoal, getGoals } from "../api/goalsApi";
 import { getProgress, completeTopic } from "../api/progressApi";
 import ProgressCard from "../components/ProgressCard";
 import RoadmapCard from "../components/RoadmapCard";
 
 function Home() {
-  const [goal, setGoal] = useState("");
-  const [skillLevel, setSkillLevel] = useState("Beginner");
+  const [goalName, setGoalName] = useState("");
+  const [skills, setSkills] = useState([{ name: "", experience_level: "Beginner" }]);
   const [studyHours, setStudyHours] = useState(10);
+  const [goals, setGoals] = useState([]);
+  const [selectedGoalId, setSelectedGoalId] = useState("");
   const [roadmap, setRoadmap] = useState(null);
-  const [roadmapId, setRoadmapId] = useState("");
   const [progress, setProgress] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  useEffect(() => {
+    getGoals().then(setGoals).catch(() => setError("Unable to load your goals."));
+  }, []);
+
+  const loadGoal = async (goalId) => {
+    setError("");
+    setSelectedGoalId(goalId);
+    if (!goalId) {
+      setRoadmap(null);
+      setProgress(null);
+      return;
+    }
+    try {
+      const selectedRoadmap = await getGoal(goalId);
+      setRoadmap(selectedRoadmap);
+      setProgress(await getProgress(goalId));
+    } catch (loadError) {
+      console.error(loadError);
+      setError("Unable to load that goal.");
+    }
+  };
 
   const handleGenerate = async () => {
     setError("");
@@ -20,17 +44,29 @@ function Home() {
       setLoading(true);
 
       const data = {
-        goal: goal || "AI Engineer",
-        skill_level: skillLevel,
+        goal_name: goalName || "AI Engineer",
+        current_skills: skills.filter((skill) => skill.name.trim()),
+        skill_level: "Adaptive",
         study_hours_per_week: Number(studyHours) || 10,
       };
 
-      const result = await generateRoadmap(data);
+      const job = await generateRoadmap(data);
+      let result;
+      let status = job;
+      while (status.status !== "complete" && status.status !== "failed") {
+        await new Promise((resolve) => setTimeout(resolve, 1200));
+        status = await getGenerationStatus(job.job_id);
+      }
+      if (status.status === "failed") {
+        throw new Error(status.error);
+      }
+      result = status;
 
       setRoadmap(result.roadmap);
-      setRoadmapId(result.roadmap_id);
+      setSelectedGoalId(result.goal_id);
+      setGoals(await getGoals());
 
-      const progressData = await getProgress(result.roadmap_id);
+      const progressData = await getProgress(result.goal_id);
       setProgress(progressData);
     } catch (fetchError) {
       console.error(fetchError);
@@ -42,7 +78,7 @@ function Home() {
 
   const handleCompleteTopic = async (phaseIndex, topicIndex) => {
     try {
-      await completeTopic(roadmapId, phaseIndex, topicIndex);
+      await completeTopic(selectedGoalId, phaseIndex, topicIndex);
 
       const updatedRoadmap = {
         ...roadmap,
@@ -62,7 +98,7 @@ function Home() {
 
       setRoadmap(updatedRoadmap);
 
-      const progressData = await getProgress(roadmapId);
+      const progressData = await getProgress(selectedGoalId);
       setProgress(progressData);
     } catch (fetchError) {
       console.error(fetchError);
@@ -73,8 +109,18 @@ function Home() {
   return (
     <div className="page-shell">
       <div className="page-panel">
-        <h1>AI Roadmap Planner</h1>
-        <p>Generate a personalized learning plan, track progress, and practice what you learn.</p>
+        <h1>Your learning goals</h1>
+        <p>Create a new personalized path or continue one of your previous goals.</p>
+
+        {goals.length > 0 && (
+          <div className="goal-history">
+            <label className="field-label" htmlFor="previous-goal">Previous goals</label>
+            <select id="previous-goal" className="select-input" value={selectedGoalId} onChange={(event) => loadGoal(event.target.value)}>
+              <option value="">Choose a saved goal</option>
+              {goals.map((goal) => <option key={goal.id} value={goal.id}>{goal.goal_name}</option>)}
+            </select>
+          </div>
+        )}
 
         <div className="feature-grid">
           <div className="feature-card">
@@ -93,26 +139,14 @@ function Home() {
 
         <div className="form-grid">
           <div>
-            <label className="field-label">Goal</label>
+            <label className="field-label">Goal name</label>
             <input
               type="text"
               className="text-input"
-              placeholder="Enter your goal"
-              value={goal}
-              onChange={(e) => setGoal(e.target.value)}
+              placeholder="e.g. Become a data analyst"
+              value={goalName}
+              onChange={(e) => setGoalName(e.target.value)}
             />
-          </div>
-          <div>
-            <label className="field-label">Skill level</label>
-            <select
-              className="select-input"
-              value={skillLevel}
-              onChange={(e) => setSkillLevel(e.target.value)}
-            >
-              <option>Beginner</option>
-              <option>Intermediate</option>
-              <option>Advanced</option>
-            </select>
           </div>
           <div>
             <label className="field-label">Hours per week</label>
@@ -127,6 +161,23 @@ function Home() {
                 setStudyHours(value > 168 ? 168 : value);
               }}
             />
+          </div>
+          <div className="skills-editor">
+            <div className="skills-heading">
+              <label className="field-label">Current skills with experience level</label>
+              <button className="text-button" type="button" onClick={() => setSkills([...skills, { name: "", experience_level: "Beginner" }])}>+ Add skill</button>
+            </div>
+            {skills.map((skill, index) => (
+              <div className="skill-row" key={index}>
+                <input className="text-input" placeholder="Skill name" value={skill.name} onChange={(event) => setSkills(skills.map((item, itemIndex) => itemIndex === index ? { ...item, name: event.target.value } : item))} />
+                <select className="select-input" value={skill.experience_level} onChange={(event) => setSkills(skills.map((item, itemIndex) => itemIndex === index ? { ...item, experience_level: event.target.value } : item))}>
+                  <option>Beginner</option>
+                  <option>Intermediate</option>
+                  <option>Advanced</option>
+                </select>
+                {skills.length > 1 && <button className="icon-button" type="button" onClick={() => setSkills(skills.filter((_, itemIndex) => itemIndex !== index))}>Remove</button>}
+              </div>
+            ))}
           </div>
           <div className="button-stack">
             <button
@@ -162,13 +213,11 @@ function Home() {
             <div>
               <h2>{roadmap.goal}</h2>
               <p>
-                <strong>Roadmap ID:</strong> {roadmapId}
+                <strong>Skill-aligned plan</strong>
               </p>
             </div>
             <div>
-              <p>
-                <strong>Study Hours/Week:</strong> {roadmap.study_hours_per_week}
-              </p>
+              <p><strong>{roadmap.study_hours_per_week} hrs/week</strong></p>
             </div>
           </div>
 

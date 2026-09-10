@@ -1,22 +1,23 @@
 import { useState } from "react";
 import { generateStudyPlan } from "../api/studyPlanApi";
+import GoalPicker from "../components/GoalPicker";
 
 function StudyPlan() {
-  const [roadmapId, setRoadmapId] = useState("");
+  const [goalId, setGoalId] = useState("");
   const [studyPlan, setStudyPlan] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const handleGenerate = async () => {
+  const handleGenerate = async (selectedGoalId = goalId) => {
     setError("");
     setStudyPlan(null);
     try {
       setLoading(true);
-      const result = await generateStudyPlan(roadmapId);
+      const result = await generateStudyPlan(selectedGoalId);
       setStudyPlan(result);
     } catch (fetchError) {
       console.error(fetchError);
-      setError("Unable to generate a study plan. Verify the roadmap ID.");
+      setError("Unable to generate a study plan for this goal.");
     } finally {
       setLoading(false);
     }
@@ -29,18 +30,8 @@ function StudyPlan() {
         <p>Generate a weekly plan for your next active topic and keep your study time focused.</p>
 
         <div className="form-row">
-          <input
-            type="text"
-            className="text-input"
-            placeholder="Roadmap ID"
-            value={roadmapId}
-            onChange={(e) => setRoadmapId(e.target.value)}
-          />
-          <button
-            className="primary-button"
-            onClick={handleGenerate}
-            disabled={loading || !roadmapId}
-          >
+          <GoalPicker onSelect={setGoalId} />
+          <button className="primary-button" onClick={() => handleGenerate()} disabled={loading || !goalId}>
             {loading ? "Generating..." : "Generate Plan"}
           </button>
         </div>

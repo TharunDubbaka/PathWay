@@ -4,11 +4,12 @@ from app.services.gemini_service import client
 import json
 
 
-def generate_study_plan(roadmap_id: str):
+def generate_study_plan(roadmap_id: str, user_id: str | None = None):
 
-    roadmap = roadmaps_collection.find_one(
-        {"_id": ObjectId(roadmap_id)}
-    )
+    query = {"_id": ObjectId(roadmap_id)}
+    if user_id:
+        query["user_id"] = user_id
+    roadmap = roadmaps_collection.find_one(query)
 
     if not roadmap:
         return None

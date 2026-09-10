@@ -133,9 +133,80 @@ nav a:hover {
   transform: translateY(-1px);
 }
 
+.nav-logout,
+.text-button,
+.icon-button {
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.nav-logout {
+  padding: 10px 16px;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  border-radius: 999px;
+  color: #ffffff;
+}
+
+.nav-logout:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
 .page-shell {
   text-align: left;
   margin-top: 28px;
+}
+
+.auth-page {
+  min-height: calc(100vh - 150px);
+  display: grid;
+  place-items: center;
+  padding: 48px 0;
+}
+
+.auth-panel {
+  width: min(880px, 100%);
+  display: grid;
+  grid-template-columns: 0.9fr 1.1fr;
+  gap: 36px;
+  padding: 42px;
+  border-radius: 30px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+}
+
+.auth-copy {
+  padding: 14px 0;
+}
+
+.auth-copy h1 {
+  margin-top: 22px;
+}
+
+.auth-form {
+  display: grid;
+  gap: 12px;
+  padding: 28px;
+  border-radius: 22px;
+  background: var(--surface-soft);
+  border: 1px solid var(--border);
+}
+
+.auth-form .primary-button {
+  margin-top: 10px;
+}
+
+.text-button {
+  color: var(--accent-strong);
+  font-weight: 700;
+  padding: 8px;
+}
+
+.text-button:hover {
+  text-decoration: underline;
 }
 
 .page-panel {
@@ -357,6 +428,46 @@ button {
   gap: 16px;
   margin-top: 20px;
   align-items: flex-end;
+}
+
+.goal-history,
+.goal-picker {
+  max-width: 520px;
+  margin: 24px 0;
+}
+
+.skills-editor {
+  grid-column: 1 / -1;
+  padding: 22px;
+  border-radius: 22px;
+  background: var(--surface-soft);
+  border: 1px solid var(--border);
+}
+
+.skills-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+}
+
+.skill-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.icon-button {
+  align-self: stretch;
+  padding: 0 12px;
+  border-radius: 14px;
+  color: var(--danger);
+  border: 1px solid rgba(185, 63, 67, 0.2);
+}
+
+.icon-button:hover {
+  background: #fff1f1;
 }
 
 .button-stack {
@@ -740,7 +851,8 @@ button {
 }
 
 @media (max-width: 780px) {
-  .navbar-inner,
+  .hero-intro,
+  .auth-panel,
   .roadmap-summary,
   .form-row,
   .progress-stats,
@@ -755,6 +867,14 @@ button {
 
   .form-row {
     grid-template-columns: 1fr;
+  }
+
+  .skill-row {
+    grid-template-columns: 1fr;
+  }
+
+  .auth-panel {
+    padding: 24px;
   }
 }
 

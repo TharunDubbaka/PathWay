@@ -8,3 +8,8 @@ export const generateRoadmap = async (data) => {
 
     return response.data;
 };
+
+export const getGenerationStatus = async (jobId) => {
+    const response = await API.get(`/roadmap/jobs/${jobId}`);
+    return response.data;
+};

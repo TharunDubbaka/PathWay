@@ -28,12 +28,14 @@ def calculate_progress(roadmap):
 def complete_topic(
     roadmap_id: str,
     phase_index: int,
-    topic_index: int
+    topic_index: int,
+    user_id: str | None = None
 ):
 
-    roadmap = roadmaps_collection.find_one(
-        {"_id": ObjectId(roadmap_id)}
-    )
+    query = {"_id": ObjectId(roadmap_id)}
+    if user_id:
+        query["user_id"] = user_id
+    roadmap = roadmaps_collection.find_one(query)
 
     if not roadmap:
         return None
@@ -56,11 +58,12 @@ def complete_topic(
         "message": "Topic completed",
         "progress": stats["progress"]
     }
-def get_progress_summary(roadmap_id: str):
+def get_progress_summary(roadmap_id: str, user_id: str | None = None):
 
-    roadmap = roadmaps_collection.find_one(
-        {"_id": ObjectId(roadmap_id)}
-    )
+    query = {"_id": ObjectId(roadmap_id)}
+    if user_id:
+        query["user_id"] = user_id
+    roadmap = roadmaps_collection.find_one(query)
 
     if not roadmap:
         return None
